@@ -17,3 +17,4 @@ package-lock.json quan ly phu thuoc cua su phu thuoc
 
 su dung nodemon trong qua trinh phat trien se tien loi hon: lang nghe su thay doi va reset sever ( thu vien nay co the cai tren may cuc bo, hoac du an )
 "start": "nodemon --inspect main.js", cach dung nodemon ,, --inspect la dung de hien thi dev tool cua nodejs rat can thiet de debug
+npm install --save-dev nodemon de cai nodemoon

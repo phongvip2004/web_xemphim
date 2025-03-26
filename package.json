@@ -4,6 +4,7 @@
   "description": "web_xemphim_phong_hieu",
   "main": "main.js",
   "scripts": {
+    "start": "nodemon --inspect main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,5 +22,8 @@
   "homepage": "https://github.com/phongvip2004/web_xemphim#readme",
   "dependencies": {
     "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }
