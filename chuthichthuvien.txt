@@ -1,0 +1,19 @@
+npm init: khoi tao du an
+
+
+express: 
+Express là một framework giành cho nodejs. Nó cung cấp cho chúng ta rất nhiều tính năng mạnh mẽ trên nền tảng web cũng như trên các ứng dụng di động.
+ Express hỗ rợ các phương thức HTTP và midleware tạo ra môt API vô cùng mạnh mẽ và dễ sử dụng.
+
+package.json quan li cac thu vien ma chuong trinh phu thuoc
+ npm install express: khi chung ta go dong nay se tai thu vien ve va luu vao node_modules
+
+
+
+
+
+package-lock.json quan ly phu thuoc cua su phu thuoc
+
+
+su dung nodemon trong qua trinh phat trien se tien loi hon: lang nghe su thay doi va reset sever ( thu vien nay co the cai tren may cuc bo, hoac du an )
+"start": "nodemon --inspect main.js", cach dung nodemon ,, --inspect la dung de hien thi dev tool cua nodejs rat can thiet de debug

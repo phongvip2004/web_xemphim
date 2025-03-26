@@ -1,0 +1,209 @@
+-- Bảng người dùng
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi người dùng
+    username VARCHAR(50) UNIQUE NOT NULL, -- Tên đăng nhập, không được trùng
+    password_hash VARCHAR(255) NOT NULL, -- Mật khẩu đã mã hóa
+    avatar VARCHAR(255) DEFAULT NULL, -- Ảnh đại diện của người dùng
+    role ENUM('admin', 'moderator', 'user') NOT NULL DEFAULT 'user', -- Vai trò của người dùng
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Thời gian tạo tài khoản
+);
+
+-- Bảng phim (bao gồm cả video do người dùng tải lên)
+CREATE TABLE movies (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi phim
+    user_id INT NULL, -- ID người dùng tải phim (NULL nếu do hệ thống thêm)
+    title VARCHAR(255) NOT NULL, -- Tên phim
+    description TEXT, -- Mô tả phim
+    release_year INT NULL, -- Năm phát hành (NULL nếu là video user upload)
+    duration INT, -- Thời lượng phim (phút)
+    director VARCHAR(255) NULL, -- Đạo diễn (NULL nếu là video user upload)
+    poster VARCHAR(255), -- Ảnh bìa phim
+    trailer_url VARCHAR(255) NULL, -- Trailer phim (NULL nếu là video user upload)
+    video_url VARCHAR(255) NOT NULL, -- Đường dẫn file video
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'approved', -- Trạng thái kiểm duyệt
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian thêm phim
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL -- Liên kết với người dùng
+);
+
+-- Bảng tập phim
+CREATE TABLE episodes (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi tập phim
+    movie_id INT, -- ID phim mà tập này thuộc về
+    episode_number INT, -- Số tập
+    title VARCHAR(255), -- Tiêu đề tập
+    video_url VARCHAR(255) NOT NULL, -- URL video tập phim
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian thêm tập phim
+    FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE -- Liên kết với phim
+);
+
+-- Bảng thể loại (2 cấp)
+CREATE TABLE genres (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi thể loại
+    parent_id INT NULL, -- NULL nếu là thể loại cấp cao nhất, có giá trị nếu là thể loại con
+    name VARCHAR(50) UNIQUE NOT NULL, -- Tên thể loại phim
+    FOREIGN KEY (parent_id) REFERENCES genres(id) ON DELETE CASCADE -- Liên kết với thể loại cha
+);
+
+-- Bảng liên kết phim và thể loại
+CREATE TABLE movie_genres (
+    movie_id INT, -- ID phim
+    genre_id INT, -- ID thể loại
+    PRIMARY KEY (movie_id, genre_id), -- Khóa chính kết hợp
+    FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE, -- Liên kết với phim
+    FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE -- Liên kết với thể loại
+);
+
+-- Bảng đánh giá phim
+CREATE TABLE ratings (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi đánh giá
+    user_id INT, -- ID người dùng đánh giá
+    movie_id INT, -- ID phim được đánh giá
+    rating FLOAT CHECK (rating >= 0 AND rating <= 5), -- Điểm đánh giá từ 0 đến 5
+    review TEXT, -- Nội dung đánh giá
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian đánh giá
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Liên kết với người dùng
+    FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE -- Liên kết với phim
+);
+
+-- Bảng bình luận
+CREATE TABLE comments (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi bình luận
+    user_id INT, -- ID người dùng bình luận
+    movie_id INT, -- ID phim được bình luận
+    content TEXT NOT NULL, -- Nội dung bình luận
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian bình luận
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Liên kết với người dùng
+    FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE -- Liên kết với phim
+);
+
+-- Bảng chủ đề diễn đàn
+CREATE TABLE forum_threads (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi chủ đề
+    user_id INT, -- ID người tạo chủ đề
+    title VARCHAR(255) NOT NULL, -- Tiêu đề chủ đề
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian tạo chủ đề
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Liên kết với người dùng
+);
+
+-- Bảng bài viết trong diễn đàn
+CREATE TABLE forum_posts (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi bài viết
+    thread_id INT, -- ID chủ đề mà bài viết thuộc về
+    user_id INT, -- ID người viết bài
+    content TEXT NOT NULL, -- Nội dung bài viết
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian viết bài
+    FOREIGN KEY (thread_id) REFERENCES forum_threads(id) ON DELETE CASCADE, -- Liên kết với chủ đề
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Liên kết với người dùng
+);
+-- Bảng lưu ảnh của bài viết trong diễn đàn
+CREATE TABLE forum_post_images (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi ảnh
+    post_id INT NOT NULL, -- ID bài viết mà ảnh thuộc về
+    image_url VARCHAR(255) NOT NULL, -- Đường dẫn URL của ảnh
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian tải ảnh lên
+    FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE -- Liên kết với bài viết
+);
+
+-- Bảng bình luận cho bài viết diễn đàn
+CREATE TABLE forum_comments (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi bình luận
+    post_id INT NOT NULL, -- ID bài viết mà bình luận thuộc về
+    user_id INT NOT NULL, -- ID người bình luận
+    content TEXT NOT NULL, -- Nội dung bình luận
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian bình luận
+    FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE, -- Liên kết với bài viết
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Liên kết với người dùng
+);
+
+-- Bảng gói VIP
+CREATE TABLE plans (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi gói
+    name VARCHAR(50) NOT NULL UNIQUE, -- Tên gói (basic, premium, vip, exclusive)
+    benefits TEXT NOT NULL -- Quyền lợi của gói
+);
+
+-- Bảng đăng ký gói VIP
+CREATE TABLE subscriptions (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi đăng ký
+    user_id INT, -- ID người dùng đăng ký
+    plan_id INT NOT NULL, -- ID gói đăng ký
+    start_date DATE NOT NULL, -- Ngày bắt đầu
+    end_date DATE NOT NULL, -- Ngày kết thúc
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian tạo đăng ký
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Liên kết với người dùng
+    FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE -- Liên kết với gói
+);
+
+-- Bảng phương thức thanh toán
+CREATE TABLE payment_methods (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi phương thức
+    method_name VARCHAR(50) NOT NULL UNIQUE -- Tên phương thức thanh toán (credit_card, paypal, ...)
+);
+
+-- Bảng giao dịch (Transactions)
+CREATE TABLE transactions (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi giao dịch
+    user_id INT NOT NULL, -- ID người thực hiện giao dịch
+    subscription_id INT NOT NULL, -- Gói VIP đã mua
+    amount DECIMAL(10,2) NOT NULL, -- Số tiền giao dịch
+    payment_method_id INT NOT NULL, -- ID phương thức thanh toán
+    status ENUM('pending', 'completed', 'failed') NOT NULL, -- Trạng thái giao dịch
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian giao dịch
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Liên kết với người dùng
+    FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE, -- Liên kết với đăng ký
+    FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id) ON DELETE CASCADE -- Liên kết với phương thức thanh toán
+);
+
+-- Bảng số xu của người dùng
+CREATE TABLE coins (
+    user_id INT PRIMARY KEY, -- ID người dùng
+    balance INT DEFAULT 0, -- Số xu hiện tại
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Liên kết với người dùng
+);
+
+-- Bảng giao dịch mua xu
+CREATE TABLE coin_transactions (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi giao dịch
+    user_id INT NOT NULL, -- ID người mua xu
+    amount INT NOT NULL, -- Số xu mua
+    cost DECIMAL(10, 2) NOT NULL, -- Số tiền đã chi
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian giao dịch
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Liên kết với người dùng
+);
+
+-- Bảng đăng ký livestream
+CREATE TABLE livestream_subscriptions (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi đăng ký
+    user_id INT NOT NULL, -- ID người dùng đăng ký
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Ngày bắt đầu đăng ký
+    end_date TIMESTAMP NOT NULL, -- Ngày kết thúc đăng ký
+    status ENUM('active', 'expired') DEFAULT 'active', -- Trạng thái đăng ký
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Liên kết với người dùng
+);
+
+
+
+-- Bảng quà tặng từ người xem cho người livestream
+CREATE TABLE gifts (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi quà tặng
+    sender_id INT NOT NULL, -- ID người tặng quà
+    receiver_id INT NOT NULL, -- ID người nhận quà
+    livestream_id INT NOT NULL, -- ID livestream liên quan
+    coins INT NOT NULL, -- Số xu tặng
+    gifted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian tặng quà
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE, -- Liên kết với người tặng
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE, -- Liên kết với người nhận
+    FOREIGN KEY (livestream_id) REFERENCES livestreams(id) ON DELETE CASCADE -- Liên kết với livestream
+);
+
+-- Bảng thu nhập của người livestream
+CREATE TABLE livestream_earnings (
+    id INT PRIMARY KEY AUTO_INCREMENT, -- ID duy nhất cho mỗi thu nhập
+    user_id INT NOT NULL, -- ID người livestream
+    livestream_id INT NOT NULL, -- ID livestream liên quan
+    coins_received INT NOT NULL, -- Số xu nhận được
+    earnings DECIMAL(10, 2) NOT NULL, -- Số tiền thực nhận (90% số xu)
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian tính thu nhập
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Liên kết với người livestream
+    FOREIGN KEY (livestream_id) REFERENCES livestreams(id) ON DELETE CASCADE -- Liên kết với livestream
+);

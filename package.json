@@ -1,0 +1,25 @@
+{
+  "name": "web_xemphim",
+  "version": "1.0.0",
+  "description": "web_xemphim_phong_hieu",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phongvip2004/web_xemphim.git"
+  },
+  "keywords": [
+    "websex, viet69sex.pro, nodejs, expressjs, viet69"
+  ],
+  "author": "phong_hieu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/phongvip2004/web_xemphim/issues"
+  },
+  "homepage": "https://github.com/phongvip2004/web_xemphim#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
