@@ -69,7 +69,7 @@ app.get('/search', (req, res) => { // Đây là 1 arrow function
 
 
 
-  res.render('search'); //tra ve file news.hbs cho client
+  res.render('search'); //tra ve file news.hbs cho client (hay con goi ra rennder ra ui  search)
   console.log(req.query);
   // render la ham cua express-handlebars
 });
@@ -80,7 +80,7 @@ app.get('/search', (req, res) => { // Đây là 1 arrow function
 
 app.post('/news', (req, res) => { // Đây là 1 arrow function
   
-  res.send("gui thanh cong len sever"); //tra ve trang news bang chuoi trong send hello world cho client
+  res.send("gui thanh cong len sever"); //tra ve trang news bang chuoi trong send cho client
   console.log(req.body);
   //phuong thuc post se khong hien thi tren url va ko luu vao query
 })
